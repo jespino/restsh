@@ -10,13 +10,10 @@ import base64
 HELP_TEXT = '''Usage: command [<command-option>...]
 
 Change cliente status:
-  setheader <setting-key> <setting-value>
-  unsetheader <setting-key>
-  settings
-  setheader <header-key> <header-value>
-  unsetheader <header-key>
-  headers
-  httplogin <username>
+  set [header, setting, requestconf] <header-key> <header-value>
+  unset [header, setting, requestconf] <header-key>
+  show [headers, settings, requestconfs]
+  login <username>
   baseurl <host>
 
 Rest actions:
@@ -27,15 +24,22 @@ Rest actions:
 '''
 
 def print_response(response, settings):
+    if settings.get('print_request', "1") in ["1","yes","true"]:
+        print "Request:"
+        print "  url: %s" % (unicode(response.request.full_url))
+        print "  data: %s" % (unicode(response.request.data))
+        print "  headers:"
+        for header in response.request.headers.iteritems():
+            print "    %s: %s" % (unicode(header[0]), unicode(header[1]))
     if settings.get('print_body', "1") in ["1","yes","true"]:
         print "Response body:"
-        print response.read()
+        print response.text
     if settings.get('print_headers', "1") in ["1","yes","true"]:
         print "Response headers:"
-        for header in response.getheaders():
+        for header in response.headers.iteritems():
             print "  %s: %s" % (header[0], header[1])
     if settings.get('print_status', "1") in ["1","yes","true"]:
-        print "Status Code: %s %s" % (unicode(response.status), unicode(response.reason))
+        print "Status Code: %s" % (unicode(response.headers['status']))
 
 if __name__=='__main__':
     restsh = RestSH()
@@ -53,27 +57,36 @@ if __name__=='__main__':
                 break
             elif command_split[0] == 'help':
                 print HELP_TEXT
-            elif command_split[0] == 'headers':
-                for header in restsh.headers.iteritems():
-                    print "%s: %s" % (header[0], header[1])
-            elif command_split[0] == 'settings':
-                for setting in restsh.settings.iteritems():
-                    print "%s: %s" % (setting[0], setting[1])
+            elif command_split[0] == 'show':
+                if command_split[1] == "headers":
+                    for header in restsh.headers.iteritems():
+                        print "%s: %s" % (header[0], header[1])
+                elif command_split[1] == "settings":
+                    for setting in restsh.settings.iteritems():
+                        print "%s: %s" % (setting[0], setting[1])
+                elif command_split[1] == "requestconfs":
+                    for request_conf in restsh.request_confs.iteritems():
+                        print "%s: %s" % (request_conf[0], request_conf[1])
             elif command_split[0] == 'set':
-                restsh.set_setting(command_split[1],' '.join(command_split[2:]))
+                if command_split[1] == "header":
+                    restsh.set_header(command_split[2],' '.join(command_split[3:]))
+                elif command_split[1] == "setting":
+                    restsh.set_setting(command_split[2],' '.join(command_split[3:]))
+                elif command_split[1] == "requestconf":
+                    restsh.set_request_conf(command_split[2],' '.join(command_split[3:]))
             elif command_split[0] == 'unset':
-                restsh.unset_setting(command_split[1])
-            elif command_split[0] == 'setheader':
-                restsh.set_header(command_split[1],' '.join(command_split[2:]))
-            elif command_split[0] == 'unsetheader':
-                restsh.unset_header(command_split[1])
+                if command_split[1] == "header":
+                    restsh.unset_header(command_split[2])
+                elif command_split[1] == "setting":
+                    restsh.unset_setting(command_split[2])
+                elif command_split[1] == "requestconf":
+                    restsh.unset_request_conf(command_split[2])
             elif command_split[0] == 'baseurl':
                 restsh.set_base_url(' '.join(command_split[1:]))
             elif command_split[0] == 'login':
                 login = ' '.join(command_split[1:])
                 password = getpass.getpass('Password: ')
-                base64string = base64.encodestring('%s:%s' % (login, password))[:-1]
-                restsh.set_header("Authorization", "Basic %s" % base64string)
+                restsh.set_auth(login, password, restsh.settings.get('auth_method', 'basic'))
             elif command_split[0] == 'get':
                 response = restsh.get(' '.join(command_split[1:]))
                 print_response(response, restsh.settings)
@@ -97,5 +110,6 @@ if __name__=='__main__':
             print "JSON ERROR: %s" % (str(e))
             print "Your PUT and POST data parameter must be in JSON format."
         except Exception as e:
+            raise
             print "ERROR: %s" % (str(e))
 

@@ -1,47 +1,47 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import httplib
-import urlparse
-import urllib
+import requests
+from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 
 class RestSH():
     base_url = ""
     headers = {}
     settings = {}
+    auth = None
 
     def __init__(self, base_url=""):
         self.base_url = base_url
 
-    def _prepare_connection(self, url):
-        urlparts = urlparse.urlparse(self.base_url+url)
-        if urlparts[0] == "https":
-            conn = httplib.HTTPSConnection(urlparts[1])
-        else:
-            conn = httplib.HTTPConnection(urlparts[1])
-        conn.set_debuglevel(self.settings.get('httplib_debuglevel', 0))
-        rel_url = "%s?%s" % (urlparts[2], urlparts[4])
-        return (conn, rel_url)
-
     def post(self, url, data):
-        (conn, rel_url) = self._prepare_connection(url)
-        conn.request("POST", rel_url, urllib.urlencode(data), self.headers)
-        return conn.getresponse()
+        return requests.post(
+                self.base_url+url,
+                data=data,
+                headers=self.headers,
+                auth=self.auth
+        )
 
     def put(self, url, data):
-        (conn, rel_url) = self._prepare_connection(url)
-        conn.request("PUT", rel_url, urllib.urlencode(data), self.headers)
-        return conn.getresponse()
+        return requests.put(
+                self.base_url+url,
+                data=data,
+                headers=self.headers,
+                auth=self.auth
+        )
 
     def get(self, url):
-        (conn, rel_url) = self._prepare_connection(url)
-        conn.request("GET", rel_url, None, self.headers)
-        return conn.getresponse()
+        return requests.get(
+                self.base_url+url,
+                headers=self.headers,
+                auth=self.auth
+        )
 
     def delete(self, url):
-        (conn, rel_url) = self._prepare_connection(url)
-        conn.request("DELETE", rel_url, None, self.headers)
-        return conn.getresponse()
+        return requests.delete(
+                self.base_url+url,
+                headers=self.headers,
+                auth=self.auth
+        )
 
     def set_header(self, key, value):
         self.headers[key] = value
@@ -57,3 +57,12 @@ class RestSH():
 
     def set_base_url(self, base_url):
         self.base_url = base_url
+
+    def set_auth(self, username, password, typ="basic"):
+        if typ == "basic":
+            self.auth = HTTPBasicAuth(username, password)
+        elif typ == "digest":
+            self.auth = HTTPDigestAuth(username, password)
+
+    def unset_header(self, key):
+        self.headers.pop(key)
