@@ -19,7 +19,7 @@ setup(
     scripts = ['restsh', ],
     install_requires=[
         'distribute',
-    ],
+        'requestrequests    ],
     setup_requires = [
         'versiontools >= 1.8',
     ],

@@ -4,13 +4,19 @@
 import readline
 import simplejson
 from restshlib.restshlib import RestSH
+import getpass
+import base64
 
 HELP_TEXT = '''Usage: command [<command-option>...]
 
 Change cliente status:
+  setheader <setting-key> <setting-value>
+  unsetheader <setting-key>
+  settings
   setheader <header-key> <header-value>
   unsetheader <header-key>
   headers
+  httplogin <username>
   baseurl <host>
 
 Rest actions:
@@ -20,13 +26,16 @@ Rest actions:
   delete <url>
 '''
 
-def print_response(response):
-    print "Response body:"
-    print response.read()
-    print "Response headers:"
-    for header in response.getheaders():
-        print "  %s: %s" % (header[0], header[1])
-    print "Status Code: %s %s" % (unicode(response.status), unicode(response.reason))
+def print_response(response, settings):
+    if settings.get('print_body', "1") in ["1","yes","true"]:
+        print "Response body:"
+        print response.read()
+    if settings.get('print_headers', "1") in ["1","yes","true"]:
+        print "Response headers:"
+        for header in response.getheaders():
+            print "  %s: %s" % (header[0], header[1])
+    if settings.get('print_status', "1") in ["1","yes","true"]:
+        print "Status Code: %s %s" % (unicode(response.status), unicode(response.reason))
 
 if __name__=='__main__':
     restsh = RestSH()
@@ -47,24 +56,36 @@ if __name__=='__main__':
             elif command_split[0] == 'headers':
                 for header in restsh.headers.iteritems():
                     print "%s: %s" % (header[0], header[1])
+            elif command_split[0] == 'settings':
+                for setting in restsh.settings.iteritems():
+                    print "%s: %s" % (setting[0], setting[1])
+            elif command_split[0] == 'set':
+                restsh.set_setting(command_split[1],' '.join(command_split[2:]))
+            elif command_split[0] == 'unset':
+                restsh.unset_setting(command_split[1])
             elif command_split[0] == 'setheader':
                 restsh.set_header(command_split[1],' '.join(command_split[2:]))
             elif command_split[0] == 'unsetheader':
                 restsh.unset_header(command_split[1])
             elif command_split[0] == 'baseurl':
                 restsh.set_base_url(' '.join(command_split[1:]))
+            elif command_split[0] == 'login':
+                login = ' '.join(command_split[1:])
+                password = getpass.getpass('Password: ')
+                base64string = base64.encodestring('%s:%s' % (login, password))[:-1]
+                restsh.set_header("Authorization", "Basic %s" % base64string)
             elif command_split[0] == 'get':
                 response = restsh.get(' '.join(command_split[1:]))
-                print_response(response)
+                print_response(response, restsh.settings)
             elif command_split[0] == 'post':
                 response = restsh.post(command_split[1], simplejson.loads(' '.join(command_split[2:])))
-                print_response(response)
+                print_response(response, restsh.settings)
             elif command_split[0] == 'put':
                 response = restsh.put(command_split[1], simplejson.loads(' '.join(command_split[2:])))
-                print_response(response)
+                print_response(response, restsh.settings)
             elif command_split[0] == 'delete':
                 response = restsh.delete(' '.join(command_split[1:]))
-                print_response(response)
+                print_response(response, restsh.settings)
             else:
                 print "ERROR: Command not found"
                 print HELP_TEXT
