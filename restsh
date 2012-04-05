@@ -6,6 +6,7 @@ import simplejson
 from restshlib.restshlib import RestSH
 import getpass
 import base64
+import sys
 
 HELP_TEXT = '''Usage: command [<command-option>...]
 
@@ -42,12 +43,21 @@ def print_response(response, settings):
         print "Status Code: %s" % (unicode(response.status_code))
 
 if __name__=='__main__':
+    login = "no-user"
+    base_url = "no-host"
+
     restsh = RestSH()
+    restsh.set_setting("prompt", "%(login)s@%(baseurl)s|restsh> ")
+
+    if len(sys.argv)>1:
+        base_url = sys.argv[1]
+        restsh.set_base_url(base_url)
     
     while True:
         try:
             try:
-                command = raw_input('restsh> ')
+                prompt = restsh.settings['prompt']
+                command = raw_input(prompt % {"login": login, "baseurl": base_url})
             except EOFError:
                 command = "quit"
             command_split = command.split()
@@ -64,25 +74,19 @@ if __name__=='__main__':
                 elif command_split[1] == "settings":
                     for setting in restsh.settings.iteritems():
                         print "%s: %s" % (setting[0], setting[1])
-                elif command_split[1] == "requestconfs":
-                    for request_conf in restsh.request_confs.iteritems():
-                        print "%s: %s" % (request_conf[0], request_conf[1])
             elif command_split[0] == 'set':
                 if command_split[1] == "header":
-                    restsh.set_header(command_split[2],' '.join(command_split[3:]))
+                    restsh.set_header(command_split[2], ' '.join(command_split[3:]))
                 elif command_split[1] == "setting":
-                    restsh.set_setting(command_split[2],' '.join(command_split[3:]))
-                elif command_split[1] == "requestconf":
-                    restsh.set_request_conf(command_split[2],' '.join(command_split[3:]))
+                    restsh.set_setting(command_split[2], ' '.join(command_split[3:]))
             elif command_split[0] == 'unset':
                 if command_split[1] == "header":
                     restsh.unset_header(command_split[2])
                 elif command_split[1] == "setting":
                     restsh.unset_setting(command_split[2])
-                elif command_split[1] == "requestconf":
-                    restsh.unset_request_conf(command_split[2])
             elif command_split[0] == 'baseurl':
-                restsh.set_base_url(' '.join(command_split[1:]))
+                base_url = ' '.join(command_split[1:])
+                restsh.set_base_url(base_url)
             elif command_split[0] == 'login':
                 login = ' '.join(command_split[1:])
                 password = getpass.getpass('Password: ')
