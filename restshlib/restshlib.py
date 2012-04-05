@@ -9,9 +9,10 @@ DEFAULT_SETTINGS = {
     'print_body': "yes",
     'print_headers': "no",
     'print_status': "no",
+    'auth_method': "basic",
 }
 
-class RestSH():
+class RestSHLib():
     base_url = ""
     headers = {}
     settings = DEFAULT_SETTINGS
