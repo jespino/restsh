@@ -10,9 +10,9 @@ import base64
 HELP_TEXT = '''Usage: command [<command-option>...]
 
 Change cliente status:
-  set [header, setting, requestconf] <header-key> <header-value>
-  unset [header, setting, requestconf] <header-key>
-  show [headers, settings, requestconfs]
+  set [header, setting] <header-key> <header-value>
+  unset [header, setting] <header-key>
+  show [headers, settings]
   login <username>
   baseurl <host>
 
@@ -39,7 +39,7 @@ def print_response(response, settings):
         for header in response.headers.iteritems():
             print "  %s: %s" % (header[0], header[1])
     if settings.get('print_status', "1") in ["1","yes","true"]:
-        print "Status Code: %s" % (unicode(response.headers['status']))
+        print "Status Code: %s" % (unicode(response.status_code))
 
 if __name__=='__main__':
     restsh = RestSH()

@@ -4,10 +4,17 @@
 import requests
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 
+DEFAULT_SETTINGS = {
+    'print_request': "no",
+    'print_body': "yes",
+    'print_headers': "no",
+    'print_status': "no",
+}
+
 class RestSH():
     base_url = ""
     headers = {}
-    settings = {}
+    settings = DEFAULT_SETTINGS
     auth = None
 
     def __init__(self, base_url=""):
