@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
+from __future__ import unicode_literals
+from __future__ import print_function
 
 import readline
 import getpass
-import base64
 import sys
 import cmd
 import shlex
-import traceback
 
 from .restshlib import RestSHLib
 
@@ -49,28 +49,32 @@ class RestSH(cmd.Cmd, object):
 
     def _print_response(self, response):
         if self.restshlib.settings.get('print_request', "1") in ["1","yes","true"]:
-            print "Request:"
-            print "  url: %s" % (unicode(response.request.full_url))
-            print "  data: %s" % (unicode(response.request.data))
-            print "  headers:"
+            print("Request:")
+            print("  url: {0}".format(response.request.full_url))
+            print("  data: {0}".format(response.request.data))
+            print("  headers:")
+
             for header in response.request.headers.iteritems():
-                print "    %s: %s" % (unicode(header[0]), unicode(header[1]))
+                print("    {0}: {1}".format(header[0], header[1]))
+
         if self.restshlib.settings.get('print_body', "1") in ["1","yes","true"]:
-            print "Response body:"
-            print response.text
+            print("Response body:")
+            print(response.text)
+
         if self.restshlib.settings.get('print_headers', "1") in ["1","yes","true"]:
-            print "Response headers:"
+            print("Response headers:")
             for header in response.headers.iteritems():
-                print "  %s: %s" % (header[0], header[1])
+                print("  {0}: {1}".format(header[0], header[1]))
+
         if self.restshlib.settings.get('print_status', "1") in ["1","yes","true"]:
-            print "Status Code: %s" % (unicode(response.status_code))
+            print("Status Code: {0}".format(response.status_code))
 
     def do_help(self, params):
         '''Show help information. Example: help set'''
         if params:
             super(RestSH, self).do_help(params)
         else:
-            print HELP_TEXT
+            print(HELP_TEXT)
 
     def do_quit(self, params):
         '''Quit restsh'''
@@ -117,10 +121,10 @@ class RestSH(cmd.Cmd, object):
             (typ,) = args
         if typ == "headers":
             for header in self.restshlib.headers.iteritems():
-                print "%s: %s" % (header[0], header[1])
+                print("{0}: {1}".format(header[0], header[1]))
         elif typ == "settings":
             for setting in self.restshlib.settings.iteritems():
-                print "%s: %s" % (setting[0], setting[1])
+                print("{0}: {1}".format(setting[0], setting[1]))
         else:
             raise Exception("Invalid type of variables")
 
@@ -131,6 +135,7 @@ class RestSH(cmd.Cmd, object):
             raise Exception("Invalid number of parameters")
         else:
             (baseurl,) = args
+
         self.baseurl = baseurl
         self.restshlib.set_base_url(self.baseurl)
 
