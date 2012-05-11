@@ -88,21 +88,22 @@ class RestSH(cmd.Cmd, object):
         '''Set headers and settings variables. Example: set settings auth_method digest'''
         args = shlex.split(params)
         if len(args) != 3:
-            raise Exception("Invalid number of parameters")
+            raise ValueError("Invalid number of parameters")
         else:
             (typ, key, value) = args
+
         if typ == "header":
             self.restshlib.set_header(key, value)
         elif typ == "setting":
             self.restshlib.set_setting(key, value)
         else:
-            raise Exception("Invalid type of variables")
+            raise ValueError("Invalid type of variables")
 
     def do_unset(self, params):
         '''Unset headers and settings variables. Example: unset settings auth_method'''
         args = shlex.split(params)
         if len(args) != 2:
-            raise Exception("Invalid number of parameters")
+            raise ValueError("Invalid number of parameters")
         else:
             (typ, key) = args
         if typ == "header":
@@ -110,13 +111,13 @@ class RestSH(cmd.Cmd, object):
         elif typ == "setting":
             self.restshlib.unset_setting(key)
         else:
-            raise Exception("Invalid type of variables")
+            raise ValueError("Invalid type of variables")
 
     def do_show(self, params):
         '''Show headers and settings variables. Example: show settings'''
         args = shlex.split(params)
         if len(args) != 1:
-            raise Exception("Invalid number of parameters")
+            raise ValueError("Invalid number of parameters")
         else:
             (typ,) = args
         if typ == "headers":
@@ -126,13 +127,13 @@ class RestSH(cmd.Cmd, object):
             for setting in self.restshlib.settings.iteritems():
                 print("{0}: {1}".format(setting[0], setting[1]))
         else:
-            raise Exception("Invalid type of variables")
+            raise ValueError("Invalid type of variables")
 
     def do_baseurl(self, params):
         '''Set the base url for all requests. Example: baseurl http://testserver.com/api'''
         args = shlex.split(params)
         if len(args) != 1:
-            raise Exception("Invalid number of parameters")
+            raise ValueError("Invalid number of parameters")
         else:
             (baseurl,) = args
 
@@ -143,7 +144,7 @@ class RestSH(cmd.Cmd, object):
         '''Set HTTP AUTH login username and password. Example: login myusername'''
         args = shlex.split(params)
         if len(args) != 1:
-            raise Exception("Invalid number of parameters")
+            raise ValueError("Invalid number of parameters")
         else:
             (username,) = args
         self.login = username
@@ -154,7 +155,7 @@ class RestSH(cmd.Cmd, object):
         '''Send get request. Example: get /url'''
         args = shlex.split(params)
         if len(args) != 1:
-            raise Exception("Invalid number of parameters")
+            raise ValueError("Invalid number of parameters")
         else:
             (url,) = args
         response = self.restshlib.get(url)
@@ -164,15 +165,16 @@ class RestSH(cmd.Cmd, object):
         '''Send post request. Example: post /url key=value test=test'''
         args = shlex.split(params)
         if len(args) <= 2:
-            raise Exception("Invalid number of parameters")
+            raise ValueError("Invalid number of parameters")
         else:
             url = args[0]
             data = {}
             for arg in args[1:]:
                 arg_split = arg.split("=")
                 if len(arg_split) != 2:
-                    raise Exception("Invalid data format")
+                    raise ValueError("Invalid data format")
                 data[arg_split[0]] = arg_split[1]
+
         response = self.restshlib.post(url, data)
         self._print_response(response)
 
@@ -180,14 +182,14 @@ class RestSH(cmd.Cmd, object):
         '''Send put request. Example: put /url key=value test=test'''
         args = shlex.split(params)
         if len(args) <= 2:
-            raise Exception("Invalid number of parameters")
+            raise Va("Invalid number of parameters")
         else:
             url = args[0]
             data = {}
             for arg in args[1:]:
                 arg_split = arg.split("=")
                 if len(arg_split) != 2:
-                    raise Exception("Invalid data format")
+                    raise ValueError("Invalid data format")
                 data[arg_split[0]] = arg_split[1]
         response = self.restshlib.put(url, data)
         self._print_response(response)
@@ -196,7 +198,7 @@ class RestSH(cmd.Cmd, object):
         '''Send delete request. Example: delete /url'''
         args = shlex.split(params)
         if len(args) != 1:
-            raise Exception("Invalid number of parameters")
+            raise ValueError("Invalid number of parameters")
         else:
             (url,) = args
         response = self.restshlib.delete(url)
@@ -206,7 +208,7 @@ class RestSH(cmd.Cmd, object):
         '''Change restsh prompt. Example: prompt "restsh> "'''
         args = shlex.split(params)
         if len(args) != 1:
-            raise Exception("Invalid number of parameters")
+            raise ValueError("Invalid number of parameters")
         else:
             (prompt,) = args
         self.cfg_prompt = prompt
