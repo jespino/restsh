@@ -8,9 +8,10 @@ import readline
 import getpass
 import sys
 import cmd
+import imp
 import shlex
 
-from .restshlib import RestSHLib
+from . import restshlib
 
 DEBUG = False
 
@@ -40,7 +41,7 @@ class RestSH(cmd.Cmd, object):
     cfg_prompt = "%(login)s@%(baseurl)s|restsh> "
 
     def __init__(self, *args, **kwargs):
-        self.restshlib = RestSHLib()
+        self.restshlib = restshlib.RestSHLib()
         self.prompt = self.cfg_prompt % {"login": self.login, "baseurl": self.baseurl}
         super(RestSH, self).__init__(*args, **kwargs)
 
@@ -68,6 +69,10 @@ class RestSH(cmd.Cmd, object):
 
         if self.restshlib.settings.get('print_status', "1") in ["1","yes","true"]:
             print("Status Code: {0}".format(response.status_code))
+
+    def do_reload(self, params):
+        imp.reload(restshlib)
+        self.restshlib = restshlib.RestSHLib()
 
     def do_help(self, params):
         '''Show help information. Example: help set'''
