@@ -6,7 +6,7 @@ from restshlib.restcmd import RestSH
 import sys
 import traceback
 
-DEBUG = False
+DEBUG = True
 
 HELP_TEXT = '''Usage: command [<command-option>...]
 

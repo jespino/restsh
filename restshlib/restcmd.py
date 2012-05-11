@@ -39,9 +39,10 @@ class RestSH(cmd.Cmd, object):
     login = "no-user"
     prompt = ""
     cfg_prompt = "%(login)s@%(baseurl)s|restsh> "
+    global_data = {}
 
     def __init__(self, *args, **kwargs):
-        self.restshlib = restshlib.RestSHLib()
+        self.restshlib = restshlib.RestSHLib(global_data=self.global_data)
         self.prompt = self.cfg_prompt % {"login": self.login, "baseurl": self.baseurl}
         super(RestSH, self).__init__(*args, **kwargs)
 
@@ -72,7 +73,7 @@ class RestSH(cmd.Cmd, object):
 
     def do_reload(self, params):
         imp.reload(restshlib)
-        self.restshlib = restshlib.RestSHLib()
+        self.restshlib = restshlib.RestSHLib(global_data=self.global_data)
 
     def do_help(self, params):
         '''Show help information. Example: help set'''
@@ -88,6 +89,30 @@ class RestSH(cmd.Cmd, object):
     def do_EOF(self, params):
         '''Quit restsh'''
         sys.exit()
+
+    def do_setenv(self, params):
+        args = shlex.split(params)
+        if len(args) % 2 != 0:
+            raise ValueError("Invalid parameters")
+
+        while True:
+            key, value = args[:2]
+            args = args[2:]
+
+            self.global_data[key] = value
+
+            if len(args) == 0:
+                break
+
+    def do_delenv(self, params):
+        args = shlex.split(params)
+
+        if len(args) < 1:
+            raise ValueError("Invalid parameters")
+
+        for arg in args:
+            if arg in self.global_data:
+                del self.global_data[arg]
 
     def do_set(self, params):
         '''Set headers and settings variables. Example: set settings auth_method digest'''

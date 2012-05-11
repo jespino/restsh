@@ -3,6 +3,7 @@
 
 import requests
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
+import copy
 
 DEFAULT_SETTINGS = {
     'print_request': "no",
@@ -18,8 +19,10 @@ class RestSHLib():
     settings = DEFAULT_SETTINGS
     auth = None
 
-    def __init__(self, base_url=""):
+    def __init__(self, base_url="", global_data={}):
         self.base_url = base_url
+        print("****", global_data)
+        self.global_data = global_data
 
     def parse_user_data(self, data):
         """
@@ -42,7 +45,7 @@ class RestSHLib():
         if len(data) == 1:
             if data[0].startswith("dict") or \
                 data[0].startswith("str"):
-                return eval(data[0])
+                return eval(data[0], copy.deepcopy(self.global_data))
 
         dict_data = {}
         for _part in data:
