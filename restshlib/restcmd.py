@@ -169,17 +169,10 @@ class RestSH(cmd.Cmd, object):
     def do_post(self, params):
         '''Send post request. Example: post /url key=value test=test'''
         args = shlex.split(params)
-        if len(args) <= 2:
+        if len(args) < 2:
             raise ValueError("Invalid number of parameters")
-        else:
-            url = args[0]
-            data = {}
-            for arg in args[1:]:
-                arg_split = arg.split("=")
-                if len(arg_split) != 2:
-                    raise ValueError("Invalid data format")
-                data[arg_split[0]] = arg_split[1]
-
+        
+        url, data = args[0], args[1:]
         response = self.restshlib.post(url, data)
         self._print_response(response)
 
