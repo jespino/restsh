@@ -4,6 +4,7 @@
 import requests
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import copy
+import shlex
 
 DEFAULT_SETTINGS = {
     'print_request': "no",
@@ -21,8 +22,7 @@ class RestSHLib():
 
     def __init__(self, base_url="", global_data={}):
         self.base_url = base_url
-        print("****", global_data)
-        self.global_data = global_data
+        self.g_data = global_data
 
     def parse_user_data(self, data):
         """
@@ -39,24 +39,28 @@ class RestSHLib():
             post http://url key=value keyN=valueN
         """
 
-        if len(data) == 0:
-            return {}
-
-        if len(data) == 1:
-            if data[0].startswith("dict") or \
-                data[0].startswith("str"):
-                return eval(data[0], copy.deepcopy(self.global_data))
-
-        dict_data = {}
-        for _part in data:
-            try:
-                key, value = _part.split("=", 1)
-            except ValueError as e:
+        try:
+            result = eval(data, copy.deepcopy(self.g_data))
+            if not isinstance(result, (basestring, dict)):
                 raise ValueError("Invalid parameters")
+            return result
 
-            dict_data[key] = value
+        except (SyntaxError, NameError) as e:
+            data = shlex.split(data)
 
-        return dict_data
+            if len(data) == 0:
+                return {}
+
+            dict_data = {}
+            for _part in data:
+                try:
+                    key, value = _part.split("=", 1)
+                except ValueError as e:
+                    raise ValueError("Invalid parameters")
+
+                dict_data[key] = value
+
+            return dict_data
             
     def post(self, url, data):
         return requests.post(

@@ -9,6 +9,7 @@ import getpass
 import sys
 import cmd
 import imp
+import re
 import shlex
 
 from . import restshlib
@@ -182,7 +183,10 @@ class RestSH(cmd.Cmd, object):
         self.restshlib.set_auth(self.login, password, self.restshlib.settings.get('auth_method', 'basic'))
 
     def do_get(self, params):
-        '''Send get request. Example: get /url'''
+        """
+        Send get request. Example: get /url
+        """
+
         args = shlex.split(params)
         if len(args) != 1:
             raise ValueError("Invalid number of parameters")
@@ -192,12 +196,10 @@ class RestSH(cmd.Cmd, object):
         self._print_response(response)
 
     def do_post(self, params):
-        '''Send post request. Example: post /url key=value test=test'''
-        args = shlex.split(params)
-        if len(args) < 2:
-            raise ValueError("Invalid number of parameters")
-        
-        url, data = args[0], args[1:]
+        """
+        Send post request. Example: post /url key=value test=test
+        """
+        url, data = re.split(r'\s+', params, 1)
         response = self.restshlib.post(url, data)
         self._print_response(response)
 
