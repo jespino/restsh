@@ -41,7 +41,7 @@ class RestSHLib():
 
         try:
             result = eval(data, copy.deepcopy(self.g_data))
-            if not isinstance(result, (basestring, dict)):
+            if not isinstance(result, (str, unicode, bytes, dict)):
                 raise ValueError("Invalid parameters")
             return result
 
