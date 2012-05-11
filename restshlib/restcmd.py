@@ -61,8 +61,7 @@ class RestSH(cmd.Cmd, object):
                 print("    {0}: {1}".format(header[0], header[1]))
 
         if self.restshlib.settings.get('print_body', "1") in ["1","yes","true"]:
-            print("Response body:")
-            print(response.text)
+            print("Response body:\n{0}".format(response.text))
 
         if self.restshlib.settings.get('print_headers', "1") in ["1","yes","true"]:
             print("Response headers:")
@@ -77,7 +76,10 @@ class RestSH(cmd.Cmd, object):
         self.restshlib = restshlib.RestSHLib(global_data=self.global_data)
 
     def do_help(self, params):
-        '''Show help information. Example: help set'''
+        """
+        Show help information. Example: help set
+        """
+        
         if params:
             super(RestSH, self).do_help(params)
         else:
@@ -116,7 +118,10 @@ class RestSH(cmd.Cmd, object):
                 del self.global_data[arg]
 
     def do_set(self, params):
-        '''Set headers and settings variables. Example: set settings auth_method digest'''
+        """
+        Set headers and settings variables. Example: set settings auth_method digest
+        """
+
         args = shlex.split(params)
         if len(args) != 3:
             raise ValueError("Invalid number of parameters")
@@ -187,46 +192,51 @@ class RestSH(cmd.Cmd, object):
         Send get request. Example: get /url
         """
 
-        args = shlex.split(params)
-        if len(args) != 1:
-            raise ValueError("Invalid number of parameters")
-        else:
-            (url,) = args
-        response = self.restshlib.get(url)
+        try:
+            url, data = re.split(r'\s+', params, 1)
+        except ValueError:
+            url, data = params, {}
+
+        response = self.restshlib.get(url, data)
         self._print_response(response)
 
     def do_post(self, params):
         """
         Send post request. Example: post /url key=value test=test
         """
-        url, data = re.split(r'\s+', params, 1)
+        
+        try:
+            url, data = re.split(r'\s+', params, 1)
+        except ValueError:
+            url, data = params, {}
+
         response = self.restshlib.post(url, data)
         self._print_response(response)
 
     def do_put(self, params):
-        '''Send put request. Example: put /url key=value test=test'''
-        args = shlex.split(params)
-        if len(args) <= 2:
-            raise Va("Invalid number of parameters")
-        else:
-            url = args[0]
-            data = {}
-            for arg in args[1:]:
-                arg_split = arg.split("=")
-                if len(arg_split) != 2:
-                    raise ValueError("Invalid data format")
-                data[arg_split[0]] = arg_split[1]
+        """
+        Send put request. Example: put /url key=value test=test
+        """
+
+        try:
+            url, data = re.split(r'\s+', params, 1)
+        except ValueError:
+            url, data = params, {}
+
         response = self.restshlib.put(url, data)
         self._print_response(response)
 
     def do_delete(self, params):
-        '''Send delete request. Example: delete /url'''
-        args = shlex.split(params)
-        if len(args) != 1:
-            raise ValueError("Invalid number of parameters")
-        else:
-            (url,) = args
-        response = self.restshlib.delete(url)
+        """
+        Send delete request. Example: delete /url
+        """
+
+        try:
+            url, data = re.split(r'\s+', params, 1)
+        except ValueError:
+            url, data = params, {}
+
+        response = self.restshlib.delete(url, data)
         self._print_response(response)
 
     def do_prompt(self, params):

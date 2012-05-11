@@ -45,7 +45,7 @@ class RestSHLib():
                 raise ValueError("Invalid parameters")
             return result
 
-        except (SyntaxError, NameError) as e:
+        except (SyntaxError) as e:
             data = shlex.split(data)
 
             if len(data) == 0:
@@ -78,18 +78,20 @@ class RestSHLib():
             auth = self.auth
         )
 
-    def get(self, url):
+    def get(self, url, data):
         return requests.get(
             self.base_url + url,
             headers = self.headers,
-            auth = self.auth
+            auth = self.auth,
+            params = self.parse_user_data(data),
         )
 
-    def delete(self, url):
+    def delete(self, url, data):
         return requests.delete(
             self.base_url + url,
             headers = self.headers,
-            auth = self.auth
+            auth = self.auth,
+            params = self.parse_user_data(data),
         )
 
     def set_header(self, key, value):
