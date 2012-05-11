@@ -10,6 +10,7 @@ import sys
 import cmd
 import imp
 import re
+import os
 import shlex
 
 from . import restshlib
@@ -41,13 +42,22 @@ class RestSH(cmd.Cmd, object):
     prompt = ""
     cfg_prompt = "%(login)s@%(baseurl)s|restsh> "
     global_data = {}
+    history_file = os.path.expanduser("~/.restsh-history")
+    history_file_max_lines = 1000
 
     def __init__(self, *args, **kwargs):
         self.restshlib = restshlib.RestSHLib(global_data=self.global_data)
         self.prompt = self.cfg_prompt % {"login": self.login, "baseurl": self.baseurl}
+
+        readline.read_history_file(self.history_file)
+        readline.set_history_length(self.history_file_max_lines)
         super(RestSH, self).__init__(*args, **kwargs)
 
+    def __del__(self):
+        readline.write_history_file(self.history_file)
+
     def postcmd(self, stop, line):
+        super(RestSH, self).postcmd(stop, line)
         self.prompt = self.cfg_prompt % {"login": self.login, "baseurl": self.baseurl}
 
     def _print_response(self, response):
