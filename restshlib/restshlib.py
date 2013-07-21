@@ -3,7 +3,6 @@
 
 import requests
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
-import copy
 import shlex
 
 DEFAULT_SETTINGS = {
@@ -13,6 +12,7 @@ DEFAULT_SETTINGS = {
     'print_status': "no",
     'auth_method': "basic",
 }
+
 
 class RestSHLib():
     base_url = ""
@@ -51,7 +51,7 @@ class RestSHLib():
         for _part in data:
             try:
                 key, value = _part.split("=", 1)
-            except ValueError as e:
+            except ValueError:
                 raise ValueError("Invalid parameters")
 
             dict_data[key] = value
@@ -61,33 +61,33 @@ class RestSHLib():
     def post(self, url, data):
         return requests.post(
             self.base_url + url,
-            data = self.parse_user_data(data),
-            headers = self.headers,
-            auth = self.auth
+            data=self.parse_user_data(data),
+            headers=self.headers,
+            auth=self.auth
         )
 
     def put(self, url, data):
         return requests.put(
             self.base_url + url,
-            data = self.parse_user_data(data),
-            headers = self.headers,
-            auth = self.auth
+            data=self.parse_user_data(data),
+            headers=self.headers,
+            auth=self.auth
         )
 
     def get(self, url, data):
         return requests.get(
             self.base_url + url,
-            headers = self.headers,
-            auth = self.auth,
-            params = self.parse_user_data(data),
+            headers=self.headers,
+            auth=self.auth,
+            params=self.parse_user_data(data),
         )
 
     def delete(self, url, data):
         return requests.delete(
             self.base_url + url,
-            headers = self.headers,
-            auth = self.auth,
-            params = self.parse_user_data(data),
+            headers=self.headers,
+            auth=self.auth,
+            params=self.parse_user_data(data),
         )
 
     def set_header(self, key, value):
@@ -110,6 +110,3 @@ class RestSHLib():
             self.auth = HTTPBasicAuth(username, password)
         elif typ == "digest":
             self.auth = HTTPDigestAuth(username, password)
-
-    def unset_header(self, key):
-        self.headers.pop(key)

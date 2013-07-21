@@ -26,7 +26,7 @@ Rest actions:
   delete <url>
 '''
 
-if __name__== '__main__':
+if __name__ ==  '__main__':
     restsh = RestSH()
     while True:
         try:
@@ -34,6 +34,6 @@ if __name__== '__main__':
         except Exception as e:
             if DEBUG:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
-                print ("*** print_tb:")
+                print("*** print_tb:")
                 traceback.print_tb(exc_traceback, file=sys.stdout)
             print("ERROR: %s " % str(e))

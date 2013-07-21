@@ -35,6 +35,7 @@ Rest actions:
   delete <url>
 '''
 
+
 class RestSH(cmd.Cmd, object):
     restshlib = None
     baseurl = "no-host"
@@ -61,7 +62,7 @@ class RestSH(cmd.Cmd, object):
         self.prompt = self.cfg_prompt % {"login": self.login, "baseurl": self.baseurl}
 
     def _print_response(self, response):
-        if self.restshlib.settings.get('print_request', "1") in ["1","yes","true"]:
+        if self.restshlib.settings.get('print_request', "1") in ["1", "yes", "true"]:
             print("Request:")
             print("  url: {0}".format(response.request.full_url))
             print("  data: {0}".format(response.request.data))
@@ -70,15 +71,15 @@ class RestSH(cmd.Cmd, object):
             for header in response.request.headers.iteritems():
                 print("    {0}: {1}".format(header[0], header[1]))
 
-        if self.restshlib.settings.get('print_body', "1") in ["1","yes","true"]:
+        if self.restshlib.settings.get('print_body', "1") in ["1", "yes", "true"]:
             print("Response body:\n{0}".format(response.text))
 
-        if self.restshlib.settings.get('print_headers', "1") in ["1","yes","true"]:
+        if self.restshlib.settings.get('print_headers', "1") in ["1", "yes", "true"]:
             print("Response headers:")
             for header in response.headers.iteritems():
                 print("  {0}: {1}".format(header[0], header[1]))
 
-        if self.restshlib.settings.get('print_status', "1") in ["1","yes","true"]:
+        if self.restshlib.settings.get('print_status', "1") in ["1", "yes", "true"]:
             print("Status Code: {0}".format(response.status_code))
 
     def do_reload(self, params):
@@ -89,7 +90,7 @@ class RestSH(cmd.Cmd, object):
         """
         Show help information. Example: help set
         """
-        
+
         if params:
             super(RestSH, self).do_help(params)
         else:
@@ -214,7 +215,7 @@ class RestSH(cmd.Cmd, object):
         """
         Send post request. Example: post /url key=value test=test
         """
-        
+
         try:
             url, data = re.split(r'\s+', params, 1)
         except ValueError:
